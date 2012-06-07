@@ -56,7 +56,6 @@ void Engine::tick() {
 
 Engine::Engine(int, char**) {
 	assert(!engine);
-	pthread_mutex_init(&mutex, NULL);
 	quit = false;
 	fps = -1;
 	wasted = 0;
@@ -75,6 +74,5 @@ Engine::~Engine() {
 	glfwTerminate();
 	alureShutdownDevice();
 	signal(SIGINT, SIG_DFL);
-	pthread_mutex_destroy(&mutex);
 	engine = NULL;
 }

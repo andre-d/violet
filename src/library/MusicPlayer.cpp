@@ -79,7 +79,6 @@ MusicPlayer::MusicPlayer() {
 	stop = true;
 	pthread_mutex_init(&player_mutex, NULL);
 	pthread_mutex_init(&control_mutex, NULL);
-	alGenBuffers(1, &(bufferID));
 	alGenSources(1, &(sourceID));
 	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
 	alSource3f(sourceID, AL_POSITION, 0.0f, 0.0f, 0.0f);
@@ -92,6 +91,5 @@ MusicPlayer::~MusicPlayer() {
 	pthread_mutex_destroy(&player_mutex);
 	pthread_mutex_destroy(&control_mutex);
 	alDeleteSources(1, &sourceID);
-	alDeleteBuffers(1, &bufferID);
 }
 

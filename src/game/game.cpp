@@ -16,7 +16,6 @@ void* control_loop(void*) {
 	Engine &engine = *engine_p;
 	MusicPlayer &player = *player_p;
 	while(!engine.should_quit()) {
-		pthread_mutex_lock(&engine.mutex);
 		if(player_p->stop) {
 			printf("done playing\n");
 			engine.request_quit();
@@ -30,7 +29,6 @@ void* control_loop(void*) {
 			glfwSleep(.1);
 		}
 		glfwSleep(.1);
-		pthread_mutex_unlock(&engine.mutex);
 	}
 	if(!player.stop) {
 		printf("quitting\n");
