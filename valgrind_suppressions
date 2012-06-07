@@ -1,0 +1,59 @@
+{
+   ALSA_Overlap
+   Memcheck:Overlap
+   ...
+   obj:/usr/lib/libasound.so*
+}
+
+{
+   ALSA_Leak
+   Memcheck:Leak
+   ...
+   obj:/usr/lib/libasound.so*
+}
+
+{
+   LIBPULSE_LEAK
+   Memcheck:Leak
+   ...
+   obj:/usr/lib/libpulse.so*
+}
+
+{
+   X11_Leak
+   Memcheck:Leak
+   ...
+   obj:/usr/lib/libX11.so*
+}
+
+{
+   AL_LEAK
+   Memcheck:Leak
+   ...
+   obj:/usr/lib/libopenal.so*
+}
+
+{
+   DL_Leak
+   Memcheck:Leak
+   ...
+   obj:/lib/libdl-*.so
+}
+
+{
+   GLFW_X11_LEAK
+   Memcheck:Leak
+   ...
+   fun:XextCreateExtension
+   ...
+   fun:glfwInit
+   ...
+}
+
+{ 
+   GL_IGNORE
+   Memcheck:Leak
+   ...
+   obj:/usr/lib/libGL.so*
+   ...
+}
