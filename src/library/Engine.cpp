@@ -10,6 +10,8 @@ extern "C" {
 
 static Engine *engine = NULL;
 
+static int s_keyboard[256] = { GLFW_RELEASE };
+
 /* This is here to prevent driving the GPU too rapidly without vsync */
 const static int MAX_ENGINE_FPS = 240;
 const static double target = (1.0/(double)MAX_ENGINE_FPS);
@@ -36,6 +38,14 @@ bool Engine::should_quit() {
 	return quit;
 }
 
+void GLFWCALL key_callback(int key, int action) {
+	s_keyboard[key] = action;
+}
+
+const int* Engine::keyboard() {
+	return s_keyboard;
+}
+
 void Engine::tick() {
 	assert(engine);
 
@@ -60,11 +70,12 @@ Engine::Engine(int, char**) {
 	wasted = 0;
 	alureInitDevice(NULL, NULL);
 	glfwInit();
-	glfwDisable(GLFW_AUTO_POLL_EVENTS);
 	last = glfwGetTime();
 	glfwOpenWindow(640, 480, 0, 0, 0, 0, 0, 0, GLFW_WINDOW);
+	glfwSetKeyCallback(key_callback);
 	glfwSetWindowCloseCallback(handle_close_event);
 	glfwSwapInterval(1);
+
 	engine = this;
 	signal(SIGINT, handle_signal);
 }

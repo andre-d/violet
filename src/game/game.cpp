@@ -20,7 +20,7 @@ void* control_loop(void*) {
 			printf("done playing\n");
 			engine.request_quit();
 		}
-		if(glfwGetKey(GLFW_KEY_SPACE) == GLFW_PRESS) {
+		if(engine.keyboard()[GLFW_KEY_SPACE] == GLFW_PRESS) {
 			if(player.player_toggle_pause()) {
 				printf("paused\n");
 			} else {

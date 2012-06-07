@@ -6,6 +6,7 @@ class Engine {
 		double wasted;
 		int fps;
 	public:
+		const int* keyboard();
 		pthread_mutex_t mutex;
 		bool should_quit();
 		bool quit_requested();
