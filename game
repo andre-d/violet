@@ -6,6 +6,8 @@ then
 	MODE="debug"
 fi
 
+# Avoid using CPU while nvidia driver is waiting
+export __GL_YIELD="USLEEP"
 
 if [ "$MODE" = "valgrind" ] || [ "$MODE" = "gdb" ]
 then

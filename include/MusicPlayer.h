@@ -12,9 +12,10 @@ class MusicPlayer {
 		pthread_mutex_t player_mutex;
 		pthread_mutex_t control_mutex;
 		bool paused;
+		bool stop;
 	 	ALuint sourceID;            // The OpenAL sound source
 	public:
-	 	bool stop;
+	 	bool player_is_stopped();
 	 	MusicPlayer();
 	 	void player_stop();
 	 	void play(std::string filename);

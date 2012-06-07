@@ -16,7 +16,7 @@ void* control_loop(void*) {
 	Engine &engine = *engine_p;
 	MusicPlayer &player = *player_p;
 	while(!engine.should_quit()) {
-		if(player_p->stop) {
+		if(player_p->player_is_stopped()) {
 			printf("done playing\n");
 			engine.request_quit();
 		}
@@ -30,7 +30,7 @@ void* control_loop(void*) {
 		}
 		glfwSleep(.1);
 	}
-	if(!player.stop) {
+	if(!player.player_is_stopped()) {
 		printf("quitting\n");
 	}
 	return NULL;

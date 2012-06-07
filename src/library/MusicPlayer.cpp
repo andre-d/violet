@@ -28,6 +28,10 @@ void MusicPlayer::play(std::string filename) {
 	stop = false;
 }
 
+bool MusicPlayer::player_is_stopped() {
+	return stop;
+}
+
 void MusicPlayer::player_stop() {
 	pthread_mutex_lock(&control_mutex);
 	stop = true;
@@ -66,7 +70,7 @@ void MusicPlayer::play_threaded(std::string filename) {
 	pthread_mutex_unlock(&control_mutex);
 
 	do {
-		alureSleep(.01);
+		alureSleep(.1);
 		alureUpdate();
 	} while (!stop);
 

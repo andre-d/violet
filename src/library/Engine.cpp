@@ -38,20 +38,19 @@ bool Engine::should_quit() {
 
 void Engine::tick() {
 	assert(engine);
-	glFinish();
-	//pthread_mutex_lock(&mutex);
+
 	glfwSwapBuffers();
+	glFinish();
+
 	double time = glfwGetTime();
 	double d = time - last;
 	last = time;
 	fps = (int)((1000.0 / (1000.0 * d)) + .5);
-	//pthread_mutex_unlock(&mutex);
 	double w;
 	while (((w = glfwGetTime()) - last) < (target + wasted - d)) {
 		pthread_yield();
 	};
 	wasted = w - time;
-	//printf("FPS: %d\n", fps);
 }
 
 Engine::Engine(int, char**) {
