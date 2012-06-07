@@ -1,0 +1,3 @@
+Import('env')
+
+env.SharedLibrary('libengine', ['Engine.cpp', 'MusicPlayer.cpp'], LIBS=['GL', 'alure'])

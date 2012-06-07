@@ -1,0 +1,21 @@
+#!/bin/sh
+
+MODE=$2
+if [ -z "$MODE" ]
+then
+	MODE="debug"
+fi
+
+
+if [ "$MODE" = "valgrind" ] || [ "$MODE" = "gdb" ]
+then
+	export LD_LIBRARY_PATH=./build/library/debug/:$LD_LIBRARY_PATH
+	if [ "$MODE" = "valgrind" ]
+	then
+		MODE="$MODE  --suppressions=valgrind_suppressions --leak-check=full --show-reachable=yes --error-limit=no --gen-suppressions=all --log-file=valgrind.log"
+	fi
+	$MODE ./build/game/debug/game "$1"
+else
+	export LD_LIBRARY_PATH=./build/library/$MODE/:$LD_LIBRARY_PATH
+	./build/game/$MODE/game "$1"
+fi
