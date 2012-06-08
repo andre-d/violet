@@ -53,6 +53,7 @@ const int* Engine::keyboard() {
 void Engine::tick() {
 	assert(engine);
 
+	alureUpdate();
 	glfwSwapBuffers();
 	glFinish();
 

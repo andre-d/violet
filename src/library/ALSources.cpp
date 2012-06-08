@@ -21,7 +21,6 @@ bool ALSources::get(ALuint &dest) {
 }
 
 void ALSources::release(ALuint source) {
-	return;
 	unavailable.erase(source);
 }
 
@@ -37,8 +36,6 @@ void ALSources::init() {
 		}
 		NUM_SOURCES++;
 	}
-
-
 }
 
 void ALSources::deinit() {
