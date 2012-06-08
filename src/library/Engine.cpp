@@ -1,16 +1,20 @@
 #include <cstdio>
 #include <cassert>
 #include <csignal>
+
 extern "C" {
 	#include <GL/glfw.h>
 	#include <AL/alure.h>
 	#include <pthread.h>
 }
-#include "Engine.h"
 
+#include "Engine.h"
+#include "ALSources.h"
+
+/* GLFW is mostly static single-windowed */
 static Engine *engine = NULL;
 
-static int s_keyboard[256] = { GLFW_RELEASE };
+static int s_keyboard[GLFW_KEY_LAST] = { GLFW_RELEASE };
 
 /* This is here to prevent driving the GPU too rapidly without vsync */
 const static int MAX_ENGINE_FPS = 240;
@@ -69,6 +73,8 @@ Engine::Engine(int, char**) {
 	fps = -1;
 	wasted = 0;
 	alureInitDevice(NULL, NULL);
+	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
+	ALSources::init();
 	glfwInit();
 	last = glfwGetTime();
 	glfwOpenWindow(640, 480, 0, 0, 0, 0, 0, 0, GLFW_WINDOW);
@@ -82,6 +88,7 @@ Engine::Engine(int, char**) {
 
 Engine::~Engine() {
 	glfwTerminate();
+	ALSources::deinit();
 	alureShutdownDevice();
 	signal(SIGINT, SIG_DFL);
 	engine = NULL;

@@ -1,5 +1,6 @@
-#include "MusicPlayer.h"
 #include <cstdio>
+#include "MusicPlayer.h"
+#include "ALSources.h"
 
 struct PlayerData {
 	std::string filename;
@@ -25,7 +26,6 @@ void MusicPlayer::play(std::string filename) {
 	stop = true;
 	pthread_mutex_lock(&player_mutex);
 	pthread_create(&thread, NULL, start_thread_play, (void*) p);
-	stop = false;
 }
 
 bool MusicPlayer::player_is_stopped() {
@@ -55,17 +55,28 @@ bool MusicPlayer::player_toggle_pause() {
 
 void MusicPlayer::play_threaded(std::string filename) {
 	ALuint buf[2];
+	stop = false;
+
 	alureStream * stream = alureCreateStreamFromFile(filename.c_str(), 19200, 2, buf);
 
 	if(stream == AL_NONE) {
 		printf("Error loading file %s: %s\n", filename.c_str(), alureGetErrorString());
 		stop = true;
+	}else if(!ALSources::get(sourceID)) {
+		printf("No OpenAL sources available\n");
+		alureDestroyStream(stream, 1, buf);
+		stop = true;
+	}
+
+	if(stop) {
 		pthread_mutex_unlock(&control_mutex);
 		pthread_mutex_unlock(&player_mutex);
 		return;
 	}
-	paused = false;
 
+	alSource3f(sourceID, AL_POSITION, 0.0f, 0.0f, 0.0f);
+
+	paused = false;
 	alurePlaySourceStream(sourceID, stream, 2, 0, stopped_callback, this);
 	pthread_mutex_unlock(&control_mutex);
 
@@ -74,8 +85,12 @@ void MusicPlayer::play_threaded(std::string filename) {
 		alureUpdate();
 	} while (!stop);
 
+	pthread_mutex_lock(&control_mutex);
 	alureStopSource(sourceID, AL_FALSE);
 	alureDestroyStream(stream, 1, buf);
+	ALSources::release(sourceID);
+	stop = true;
+	pthread_mutex_unlock(&control_mutex);
 	pthread_mutex_unlock(&player_mutex);
 }
 
@@ -83,9 +98,6 @@ MusicPlayer::MusicPlayer() {
 	stop = true;
 	pthread_mutex_init(&player_mutex, NULL);
 	pthread_mutex_init(&control_mutex, NULL);
-	alGenSources(1, &(sourceID));
-	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
-	alSource3f(sourceID, AL_POSITION, 0.0f, 0.0f, 0.0f);
 }
 
 MusicPlayer::~MusicPlayer() {
@@ -94,6 +106,5 @@ MusicPlayer::~MusicPlayer() {
 	pthread_join(thread, &p);
 	pthread_mutex_destroy(&player_mutex);
 	pthread_mutex_destroy(&control_mutex);
-	alDeleteSources(1, &sourceID);
 }
 
