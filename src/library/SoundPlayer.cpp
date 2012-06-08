@@ -2,30 +2,9 @@
 #include "SoundPlayer.h"
 #include "ALSources.h"
 
-struct PlayerData {
-	std::string filename;
-	SoundPlayer* player;
-};
 
 void stopped_callback(void* p, ALuint) {
 	((SoundPlayer*)p)->player_stop();
-}
-
-void* start_thread_play(void *p) {
-	PlayerData* pdata = (PlayerData*) p;
-	pdata->player->play_threaded(pdata->filename);
-	delete pdata;
-	return NULL;
-}
-
-void SoundPlayer::play(std::string filename) {
-	PlayerData *p = new PlayerData;
-	p->player = this;
-	p->filename = filename;
-	pthread_mutex_lock(&control_mutex);
-	stop = true;
-	pthread_mutex_lock(&player_mutex);
-	pthread_create(&thread, NULL, start_thread_play, (void*) p);
 }
 
 bool SoundPlayer::player_is_stopped() {
@@ -33,31 +12,47 @@ bool SoundPlayer::player_is_stopped() {
 }
 
 void SoundPlayer::player_stop() {
-	pthread_mutex_lock(&control_mutex);
-	stop = true;
-	pthread_mutex_unlock(&control_mutex);
+	_player_stop(true);
+}
+
+void SoundPlayer::_player_stop(bool lock) {
+	if(lock) {
+		pthread_mutex_lock(&control_mutex);
+	}
+	if(!stop) {
+		stop = paused = true;
+		alureStopSource(sourceID, AL_FALSE);
+		alureDestroyStream(stream, 1, buf);
+		ALSources::release(sourceID);
+		pthread_mutex_unlock(&player_mutex);
+	}
+	if(lock) {
+		pthread_mutex_unlock(&control_mutex);
+	}
 }
 
 bool SoundPlayer::player_toggle_pause() {
 	pthread_mutex_lock(&control_mutex);
-	if(stop) {
-		return true;
+	if(!stop) {
+		if(paused) {
+			alureResumeSource(sourceID);
+		} else {
+			alurePauseSource(sourceID);
+		}
+		paused = !paused;
 	}
-	if(paused) {
-		alureResumeSource(sourceID);
-	} else {
-		alurePauseSource(sourceID);
-	}
-	paused = !paused;
 	pthread_mutex_unlock(&control_mutex);
 	return paused;
 }
 
-void SoundPlayer::play_threaded(std::string filename) {
-	ALuint buf[2];
+void SoundPlayer::play(std::string filename) {
+	pthread_mutex_lock(&control_mutex);
+	_player_stop(false);
+	pthread_mutex_lock(&player_mutex);
+
 	stop = true;
 
-	alureStream * stream = alureCreateStreamFromFile(filename.c_str(), 19200, 2, buf);
+	stream = alureCreateStreamFromFile(filename.c_str(), 19200, 2, buf);
 
 	if(stream == AL_NONE) {
 		printf("Error loading file %s: %s\n", filename.c_str(), alureGetErrorString());
@@ -65,25 +60,12 @@ void SoundPlayer::play_threaded(std::string filename) {
 		printf("No OpenAL sources available\n");
 		alureDestroyStream(stream, 1, buf);
 	} else {
+		stop = paused = false;
 		alSourcef(sourceID, AL_GAIN, volume);
 		alSource3f(sourceID, AL_POSITION, x, y, z);
 		alurePlaySourceStream(sourceID, stream, 2, 0, stopped_callback, this);
-		stop = paused = false;
-		pthread_mutex_unlock(&control_mutex);
-
-		do {
-			// TODO: Decide if we need this thread
-			alureSleep(.1);
-		} while (!stop);
-
-		pthread_mutex_lock(&control_mutex);
-		alureStopSource(sourceID, AL_FALSE);
-		alureDestroyStream(stream, 1, buf);
-		ALSources::release(sourceID);
-		stop = true;
 	}
 	pthread_mutex_unlock(&control_mutex);
-	pthread_mutex_unlock(&player_mutex);
 }
 
 void SoundPlayer::update_position(float x, float y, float z) {
@@ -108,6 +90,7 @@ void SoundPlayer::update_volume(float volume) {
 
 SoundPlayer::SoundPlayer(float volume, float x, float y, float z) {
 	stop = true;
+	paused = true;
 	pthread_mutex_init(&player_mutex, NULL);
 	pthread_mutex_init(&control_mutex, NULL);
 	update_volume(volume);
@@ -115,9 +98,7 @@ SoundPlayer::SoundPlayer(float volume, float x, float y, float z) {
 }
 
 SoundPlayer::~SoundPlayer() {
-	void* p;
-	stop = true;
-	pthread_join(thread, &p);
+	player_stop();
 	pthread_mutex_destroy(&player_mutex);
 	pthread_mutex_destroy(&control_mutex);
 }

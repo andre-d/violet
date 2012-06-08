@@ -16,6 +16,9 @@ class SoundPlayer {
 		float volume;
 		float x;
 		float y;
+		ALuint buf[2];
+		alureStream * stream;
+		void _player_stop(bool lock);
 		float z;
 	 	ALuint sourceID;            // The OpenAL sound source
 	public:
