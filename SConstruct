@@ -22,7 +22,7 @@ else:
     env['ENV']['TERM'] = os.environ['TERM']
     env['CXX'] = 'clang++'
     env.Append(CPPPATH=['#include'])
-    env.Append(CPPFLAGS=['-Wall', '-Wextra', '-std=c++03', '-pedantic', '-fno-exceptions'])
+    env.Append(CPPFLAGS=['-Wall', '-Wextra', '-Werror', '-std=c++03', '-pedantic'])
     
     if mode == 'debug':
         env.Append(CPPFLAGS=['-g', '-O0'])

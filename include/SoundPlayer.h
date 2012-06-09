@@ -18,16 +18,20 @@ class SoundPlayer {
 		float y;
 		ALuint buf[2];
 		alureStream * stream;
-		void _player_stop(bool lock);
+		void _player_stop();
 		float z;
+		void init(float volume, float x, float y, float z);
 	 	ALuint sourceID;            // The OpenAL sound source
 	public:
 	 	bool player_is_stopped();
 	 	void update_position(float x, float y, float z);
 	 	void update_volume(float volume);
+	 	SoundPlayer();
 	 	SoundPlayer(float volume, float x, float y, float z);
 	 	void player_stop();
+
 	 	void play(std::string filename);
+
 	 	void play_threaded(std::string filename);
 	 	bool player_toggle_pause();
 	 	virtual ~SoundPlayer();

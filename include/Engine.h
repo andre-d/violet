@@ -4,19 +4,26 @@ class Engine {
 		bool quit;
 		double last;
 		double wasted;
-		int fps;
+		void _tick();
 	public:
+		int fps;
+
 		const int* keyboard();
-		pthread_mutex_t mutex;
 		bool should_quit();
-		bool quit_requested();
+		virtual bool quit_requested();
 
 		int get_fps();
 
-		void tick();
+		void go();
 
-		Engine(int argc, char **argv);
+		virtual void started()=0;
 
-		virtual bool request_quit();
+		virtual void tick()=0;
+
+		virtual void draw() = 0;
+
+		Engine(int argc, char **argv, std::string app_name);
+
+		bool request_quit();
 		virtual ~Engine();
 };
