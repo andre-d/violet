@@ -6,6 +6,8 @@ class Engine {
 		double wasted;
 		void _tick();
 	public:
+		bool has_audio;
+
 		int fps;
 
 		const int* keyboard();

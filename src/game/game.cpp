@@ -24,13 +24,11 @@ void Game::tick() {
 		}
 		glfwSleep(.5);
 	}
-
-	glfwSleep(.01);
 }
 
 void Game::draw() {
 	glClear(GL_COLOR_BUFFER_BIT);
-	printf("FPS: %d\n", fps);
+	//printf("FPS: %d\n", fps);
 }
 
 Game::Game(int argc, char** argv): Engine(argc, argv, "gametest") {

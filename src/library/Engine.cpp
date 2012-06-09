@@ -11,6 +11,7 @@ extern "C" {
 }
 
 #include "Engine.h"
+#include "SoundPlayer.h"
 #include "ALSources.h"
 
 /* GLFW is mostly static single-windowed */
@@ -51,6 +52,7 @@ void* control_loop(void* e) {
 	Engine *engine = (Engine *)e;
 	while(!engine->should_quit()) {
 		engine->tick();
+		glfwSleep(.01);
 	}
 	return NULL;
 }
@@ -66,7 +68,7 @@ void Engine::go() {
 	glfwSetKeyCallback(key_callback);
 	glfwSetWindowCloseCallback(handle_close_event);
 	signal(SIGINT, handle_signal);
-	glfwSwapInterval(0);
+	glfwSwapInterval(1);
 	started();
 	pthread_create(&thread, NULL, control_loop, this);
 	while(!should_quit()){
@@ -101,6 +103,7 @@ Engine::Engine(int argc, char** argv, std::string app_name) {
 	assert(!engine);
 
 	quit = false;
+	has_audio = false;
 	fps = -1;
 	wasted = 0;
 
@@ -113,12 +116,13 @@ Engine::Engine(int argc, char** argv, std::string app_name) {
 	}
 
 	if(alureInitDevice(NULL, NULL) == AL_FALSE) {
-		throw std::runtime_error("Failed to init ALURE (Audio): " + std::string(alureGetErrorString()));
+		printf("Failed to init audo: %s\n", alureGetErrorString());
+		__SoundPlayer_audio_is_disabled = false;
+	} else {
+		alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
+		ALSources::init();
+		has_audio = true;
 	}
-
-	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
-
-	ALSources::init();
 
 	if(glfwInit() != GL_TRUE) {
 		throw std::runtime_error("Failed to init glfw (Graphics)");

@@ -2,6 +2,7 @@
 #include "SoundPlayer.h"
 #include "ALSources.h"
 
+bool __SoundPlayer_audio_is_disabled = false;
 
 void stopped_callback(void* p, ALuint) {
 	((SoundPlayer*)p)->player_stop();
@@ -42,6 +43,10 @@ bool SoundPlayer::player_toggle_pause() {
 }
 
 void SoundPlayer::play(std::string filename) {
+	if(__SoundPlayer_audio_is_disabled) {
+		return;
+	}
+
 	pthread_mutex_lock(&control_mutex);
 	_player_stop();
 	pthread_mutex_lock(&player_mutex);

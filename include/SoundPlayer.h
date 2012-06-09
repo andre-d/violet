@@ -7,6 +7,8 @@ extern "C" {
 	#include <pthread.h>
 }
 
+extern bool __SoundPlayer_audio_is_disabled;
+
 class SoundPlayer {
 		pthread_t thread;
 		pthread_mutex_t player_mutex;
