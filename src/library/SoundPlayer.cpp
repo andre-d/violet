@@ -8,6 +8,10 @@ void stopped_callback(void* p, ALuint) {
 	((SoundPlayer*)p)->player_stop();
 }
 
+bool SoundPlayer::player_is_paused() {
+	return paused;
+}
+
 bool SoundPlayer::player_is_stopped() {
 	return stop;
 }

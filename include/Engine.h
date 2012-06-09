@@ -5,7 +5,14 @@ class Engine {
 		double last;
 		double wasted;
 		void _tick();
+	protected:
+		pthread_mutex_t engine_mutex;
+		bool swap;
+		bool old_swap;
 	public:
+		int window_width;
+		int window_height;
+
 		bool has_audio;
 
 		int fps;

@@ -26,6 +26,7 @@ class SoundPlayer {
 	 	ALuint sourceID;            // The OpenAL sound source
 	public:
 	 	bool player_is_stopped();
+	 	bool player_is_paused();
 	 	void update_position(float x, float y, float z);
 	 	void update_volume(float volume);
 	 	SoundPlayer();

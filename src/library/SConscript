@@ -1,3 +1,4 @@
 Import('env')
 
-env.SharedLibrary('libengine', ['Engine.cpp', 'SoundPlayer.cpp', 'ALSources.cpp'], LIBS=['GL', 'alure'])
+env.ParseConfig('freetype-config --cflags --libs')
+env.SharedLibrary('libengine', ['Engine.cpp', 'SoundPlayer.cpp', 'ALSources.cpp', 'Text.cpp'])

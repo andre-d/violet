@@ -33,6 +33,13 @@ int GLFWCALL handle_close_event() {
 	return engine->request_quit() ? GL_TRUE : GL_FALSE;
 }
 
+void GLFWCALL handle_resize_event(int width, int height) {
+	assert(engine);
+	glViewport(0, 0, width, height);
+	engine->window_width = width;
+	engine->window_height = height;
+}
+
 bool Engine::quit_requested() {
 	return true;
 }
@@ -65,10 +72,12 @@ void Engine::go() {
 	pthread_t thread;
 	void* p;
 	glfwOpenWindow(640, 480, 0, 0, 0, 0, 0, 0, GLFW_WINDOW);
+	glfwGetWindowSize(&window_width, &window_height);
 	glfwSetKeyCallback(key_callback);
 	glfwSetWindowCloseCallback(handle_close_event);
+	glfwSetWindowSizeCallback(handle_resize_event);
 	signal(SIGINT, handle_signal);
-	glfwSwapInterval(1);
+	glfwSwapInterval(swap);
 	started();
 	pthread_create(&thread, NULL, control_loop, this);
 	while(!should_quit()){
@@ -84,6 +93,13 @@ const int* Engine::keyboard() {
 void Engine::_tick() {
 	assert(engine);
 	alureUpdate();
+	if(pthread_mutex_trylock(&engine_mutex)) {
+		if(swap != old_swap) {
+			glfwSwapInterval(swap);
+			old_swap = swap;
+		}
+		pthread_mutex_unlock(&engine_mutex);
+	}
 	draw();
 	glfwSwapBuffers();
 	glFinish();
@@ -101,10 +117,12 @@ void Engine::_tick() {
 
 Engine::Engine(int argc, char** argv, std::string app_name) {
 	assert(!engine);
+	pthread_mutex_init(&engine_mutex, NULL);
 
 	quit = false;
 	has_audio = false;
 	fps = -1;
+	swap = old_swap = true;
 	wasted = 0;
 
 	if(!argc) {
@@ -137,5 +155,6 @@ Engine::~Engine() {
 	ALSources::deinit();
 	alureShutdownDevice();
 	signal(SIGINT, SIG_DFL);
+	pthread_mutex_destroy(&engine_mutex);
 	engine = NULL;
 }
